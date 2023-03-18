@@ -8,7 +8,8 @@ I2CGPS myI2CGPS; //Hook object to the library
 
 #include <TinyGPS++.h> //From: https://github.com/mikalhart/TinyGPSPlus
 TinyGPSPlus gps; //Declare gps object
-/*GPS*/
+
+/*GPS variables*/
 double lat;
 double lng;
 double location;
@@ -45,15 +46,11 @@ char msg[50];
 int value = 0;
 
 
-
-// defines pins numbers for Relay and motor
+// defines pins numbers for Distance sensor (HC-SR04) and Motor
 int trigPin = 13;
 int echoPin = 14;
 int motorPin = 25; // in1 pin on Relay
-//int buttonPin = 26; // The GPIO pin connected to the button
-//int trigPin = 14;    // Trigger
 
-//int echoPin = 13;    // Echo
 
 long duration, cm, inches;
 
@@ -85,18 +82,14 @@ void setup() {
 
   Serial.println("Setup started");
 
-  //Define inputs and outputs
-
+  //Define inputs and outputs for Distance Sensor and Motor
   pinMode(trigPin, OUTPUT);
-
   pinMode(echoPin, INPUT);
-
-    //Motor pin
   pinMode(motorPin, OUTPUT);
 
 }
 
-/*Wifi */
+/*Wifi connection Setting */
 void setup_wifi() {
   delay(10);
   // We start by connecting to a WiFi network
@@ -134,12 +127,11 @@ void reconnect() {
   }
 }
 
- //Display new GPS info
+ //displayInfo() function is used to print GPS data to the serial monitor.
 void displayInfo()
 {
-  //We have new GPS data to deal with!
   Serial.println();
-
+  //first checks if the GPS data contains valid time information , prints the date and time information to the serial monitor 
   if (gps.time.isValid())
   {
     Serial.print(F("Date: "));
@@ -161,11 +153,13 @@ void displayInfo()
 
     Serial.println(); //Done printing time
   }
+  //If the GPS data does not contain valid time information, the function prints the message "Time not yet valid" to the serial monitor.
   else
   {
     Serial.println(F("Time not yet valid"));
   }
 
+  //If the location information is valid, the function prints the latitude and longitude information to the serial monitor with 6 decimal 
   if (gps.location.isValid())
   {
     Serial.print("Location: ");
@@ -174,6 +168,7 @@ void displayInfo()
     Serial.print(gps.location.lng(), 6);
     Serial.println();
   }
+  //If the location information is not yet valid, the function prints the message "Location not yet valid" to the serial monitor.
   else
   {
     Serial.println(F("Location not yet valid"));
@@ -183,7 +178,6 @@ void displayInfo()
 
 void loop() {
   
-
   /*GPS*/
     while (myI2CGPS.available()) //available() returns the number of new bytes available from the GPS module
   {
@@ -197,7 +191,7 @@ void loop() {
    /*GPS*/
   // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
 
-  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:   
 
   digitalWrite(trigPin, LOW);
 
@@ -226,17 +220,6 @@ void loop() {
   inches = (duration/2) / 74;   // Divide by 74 or multiply by 0.0135
 
  
-/*
-  Serial.print(inches);
-
-  Serial.print("in, ");
-
-  Serial.print(cm);
-
-  Serial.print("cm");
-    
-  Serial.println();
-/*/
   delay(100);
 
 // switch
@@ -369,8 +352,6 @@ buttonState = digitalRead(buttonPin); //informs buttonstate of buttonpin
      clicks = 0;
      delay(3000);
   }
-
-
 
 
 if (!client.connected()) {
