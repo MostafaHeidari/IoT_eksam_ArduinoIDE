@@ -57,13 +57,14 @@ int motorPin = 25; // in1 pin on Relay
  int motorPin2 = 26;
 
 
-long duration, cm, inches;
-long duration2, cmm, inches2;
+long duration, cm;
+long duration2, cm2;
 
 int currentState;     // the current reading from the input pin
 
 void setup() {
   /*GPS*/
+    
   Serial.begin(115200);
   Serial.println("GTOP Read Example");
 
@@ -187,6 +188,91 @@ void displayInfo()
   }
 } /*GPS*/
 
+// The sensor is triggered by a HIGH pulse of 10 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse: 
+long sensor(int trigPins, int echoPins){
+  digitalWrite(trigPins, LOW);
+  delayMicroseconds(10);
+  digitalWrite(trigPins, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPins, LOW);
+  long durations = pulseIn(echoPins, HIGH); /*active or on*/
+  return durations;
+}
+
+void motorLogic(int motorPins, int cms){
+if (cms <= 100){
+      digitalWrite(motorPins, LOW);
+    } else if (cms >= 101){
+      digitalWrite(motorPins, HIGH);
+    }
+}
+
+void buttonLogic(int dangerLevel) {
+//find location
+    lat = gps.location.lat();
+    lng = gps.location.lng();
+
+    month = gps.date.month();
+    day = gps.date.day();
+    year = gps.date.year();
+
+    hour = gps.time.hour()+1;
+    minute = gps.time.minute();
+    second = gps.time.second();
+    
+
+     String locationStr = "";
+     String latStr = "";
+     String lngStr = "";
+     String monthStr = "";
+     String dayStr = "";
+     String yearStr = "";
+     String hourStr = "";
+     String minuteStr = "";
+     String secondStr = "";
+     String dangerLevelStr = "";
+
+     latStr = String(lat, 10);
+     latStr.trim();
+     lngStr = String(lng, 10);
+     lngStr.trim();
+     monthStr = String(month, 0);
+     monthStr.trim();
+     dayStr = String(day, 0);
+     dayStr.trim();
+     yearStr = String(year, 0);
+     yearStr.trim();
+     hourStr = String(hour, 0);
+     hourStr.trim();
+     minuteStr = String(minute, 0);
+     minuteStr.trim();
+     secondStr = String(second, 0);
+     secondStr.trim();
+     //dangerLevelStr = String;     
+     switch(dangerLevel){
+     case 1:
+     dangerLevelStr = "Small danger in area, ";
+     break;
+     case 2:
+     dangerLevelStr = "Big danger in area, ";
+     break;
+     }
+     locationStr = dangerLevelStr + latStr + " " + lngStr + ", " + dayStr + "/" + monthStr + "/" + yearStr + " " + hourStr + ":" + minuteStr + ":" + secondStr;
+     int len = locationStr.length()+1;
+     char char_array[len];
+     locationStr.toCharArray(char_array, len);
+     Serial.println(locationStr);     
+
+    //Press Action
+    client.publish("BlindData/warningLocation", char_array);
+     
+     //set variables back to 0
+      timePress = 0;
+      timePressLimit = 0;
+      clicks = 0;
+      delay(3000);    
+}
 
 void loop() {
   
@@ -200,68 +286,26 @@ void loop() {
   {
     displayInfo();
   }
-   /*GPS*/
-  // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
 
-  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:   
-
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH); /*active or on*/
-
-
-  digitalWrite(trigPin2, LOW);
-  delayMicroseconds(10);
-  digitalWrite(trigPin2, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin2, LOW);
-  duration2 = pulseIn(echoPin2, HIGH); /*active or on*/
+  duration = sensor(trigPin, echoPin);
+  duration2 = sensor(trigPin2, echoPin2);
 
   // Convert the time into a distance
-
   cm = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+  cm2 = (duration2/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
 
-  inches = (duration/2) / 74;   // Divide by 74 or multiply by 0.0135
+  /*Motor logic*/
+  motorLogic(motorPin, cm);
+  motorLogic(motorPin2, cm2);
 
-  cmm = (duration2/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
-
-  inches2 = (duration2/2) / 74;   // Divide by 74 or multiply by 0.0135
-
-
-
- Serial.print(inches2);
-  Serial.print("in, ");
-  Serial.print(cmm);
-  Serial.print("cmm");
-    
+  //debug cm
+  Serial.print(cm2);
+  Serial.print("cm2");    
   Serial.println();
 
-  Serial.print(inches);
-  Serial.print("in, ");
   Serial.print(cm);
   Serial.print("cm");
-    
   Serial.println();
-
-
-// switch
-  
-/*Motor logic*/
-    if (cm <= 100){
-      digitalWrite(motorPin, LOW);
-    } else if (cm >= 101){
-      digitalWrite(motorPin, HIGH);
-    }
-
-    /*motor 2*/
-    if (cmm <= 100){
-      digitalWrite(motorPin2, LOW);
-    } else if (cmm >= 101){
-      digitalWrite(motorPin2, HIGH);
-    }
 
 /*all the buttom Logic*/
 buttonState = digitalRead(buttonPin); //informs buttonstate of buttonpin
@@ -278,111 +322,14 @@ buttonState = digitalRead(buttonPin); //informs buttonstate of buttonpin
 
     //hold press
     else if (clicks == 1 && millis() < timePressLimit){
-
-
-    //find location
-    lat = gps.location.lat();
-    lng = gps.location.lng();
-
-    month = gps.date.month();
-    day = gps.date.day();
-    year = gps.date.year();
-
-    hour = gps.time.hour();
-    minute = gps.time.minute();
-    second = gps.time.second();
-    
-
-     String locationStr = "";
-     String latStr = "";
-     String lngStr = "";
-     String monthStr = "";
-     String dayStr = "";
-     String yearStr = "";
-     String hourStr = "";
-     String minuteStr = "";
-     String secondStr = "";
-
-     latStr = String(lat, 10);
-     lngStr = String(lng, 10);
-     monthStr = String(month, 0);
-     dayStr = String(day, 0);
-     yearStr = String(year, 0);
-     hourStr = String(hour, 0);
-     minuteStr = String(minute, 0);
-     secondStr = String(second, 0);     
-     locationStr = "Big danger in area, " + latStr + " " + lngStr + ", " + dayStr + "/" + monthStr + "/" + yearStr + " " + hourStr + ":" + minuteStr + ":" + secondStr;
-     int len = locationStr.length();
-     char char_array[len];
-     locationStr.toCharArray(char_array, len);
-     Serial.println(locationStr);     
-
-      //hold Press Action
-      Serial.println("Button Pressed twice");
-      client.publish("BlindData/warningLocation", char_array);
-      //client.publish("BlindData/location","Location");
-     
-     //set variables back to 0
-      timePress = 0;
-      timePressLimit = 0;
-      clicks = 0;
-      delay(3000);      
+      buttonLogic(2);
     }    
   }
 
-  //single press
-  if (clicks == 1 && timePressLimit != 0 && millis() > timePressLimit){
+    //single press
+     if (clicks == 1 && timePressLimit != 0 && millis() > timePressLimit){
+      buttonLogic(1);
 
-    //find location
-    lat = gps.location.lat();
-    lng = gps.location.lng();
-     //find location
-    lat = gps.location.lat();
-    lng = gps.location.lng();
-
-    month = gps.date.month();
-    day = gps.date.day();
-    year = gps.date.year();
-
-    hour = gps.time.hour();
-    minute = gps.time.minute();
-    second = gps.time.second();
-    
-
-     String locationStr = "";
-     String latStr = "";
-     String lngStr = "";
-     String monthStr = "";
-     String dayStr = "";
-     String yearStr = "";
-     String hourStr = "";
-     String minuteStr = "";
-     String secondStr = "";
-
-     latStr = String(lat, 10);
-     lngStr = String(lng, 10);
-     monthStr = String(month, 0);
-     dayStr = String(day, 0);
-     yearStr = String(year, 0);
-     hourStr = String(hour, 0);
-     minuteStr = String(minute, 0);
-     secondStr = String(second, 0);     
-     locationStr = "Small danger in area, " + latStr + " " + lngStr + ", " + dayStr + "/" + monthStr + "/" + yearStr + " " + hourStr + ":" + minuteStr + ":" + secondStr;
-     int len = locationStr.length();
-     char char_array[len];
-     locationStr.toCharArray(char_array, len);
-     Serial.println(locationStr);
-     
-     //Single Press Action
-      Serial.println("Button Pressed Once");
-     client.publish("BlindData/warningLocation", char_array);
-     //client.publish("BlindData/location",);
-
-     //set variables back to 0
-     timePress = 0;
-     timePressLimit = 0;
-     clicks = 0;
-     delay(3000);
   }
 
 
