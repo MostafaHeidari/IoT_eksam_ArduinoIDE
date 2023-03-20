@@ -32,8 +32,8 @@ unsigned long timePressLimit = 0; //limit to wait for Hold click
 int clicks = 0; //number of clicks
 
 //Password for internet
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "MostafaPhone";
+const char* password = "most455656";
 
 //the mqtt server
 const char* mqtt_server = "mqtt.flespi.io";
@@ -50,9 +50,15 @@ int value = 0;
 int trigPin = 13;
 int echoPin = 14;
 int motorPin = 25; // in1 pin on Relay
+//
+ /*Anden sensor*/
+ int trigPin2 = 16;
+ int echoPin2 = 17;
+ int motorPin2 = 26;
 
 
 long duration, cm, inches;
+long duration2, cmm, inches2;
 
 int currentState;     // the current reading from the input pin
 
@@ -72,7 +78,7 @@ void setup() {
 
 
   /* MQTT and button*/
-  pinMode(2, INPUT);
+  pinMode(2, INPUT);  /*sets pin 2 as an input pin, which is used to read signals from the sensor.*/
   setup_wifi();
   client.setServer(mqtt_server, 1883);
 
@@ -83,9 +89,15 @@ void setup() {
   Serial.println("Setup started");
 
   //Define inputs and outputs for Distance Sensor and Motor
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+  pinMode(trigPin,  OUTPUT);
+  pinMode(echoPin, INPUT); /*to allow the Arduino to read the incoming signal from the sensor,Without setting the pin mode to input, the Arduino would not be able to receive the signal from the sensor, and the distance measurement would not be possible.*/
   pinMode(motorPin, OUTPUT);
+
+  /*sensor 2*/
+  pinMode(trigPin2,  OUTPUT);
+  pinMode(echoPin2, INPUT); 
+  pinMode(motorPin2, OUTPUT);
+
 
 }
 
@@ -194,24 +206,19 @@ void loop() {
   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:   
 
   digitalWrite(trigPin, LOW);
-
   delayMicroseconds(10);
-
   digitalWrite(trigPin, HIGH);
-
   delayMicroseconds(10);
-
   digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH); /*active or on*/
 
-  // Read the signal from the sensor: a HIGH pulse whose
 
-  // duration is the time (in microseconds) from the sending
-
-  // of the ping to the reception of its echo off of an object.
-
-  pinMode(echoPin, INPUT);
-
-  duration = pulseIn(echoPin, HIGH);
+  digitalWrite(trigPin2, LOW);
+  delayMicroseconds(10);
+  digitalWrite(trigPin2, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin2, LOW);
+  duration2 = pulseIn(echoPin2, HIGH); /*active or on*/
 
   // Convert the time into a distance
 
@@ -219,8 +226,26 @@ void loop() {
 
   inches = (duration/2) / 74;   // Divide by 74 or multiply by 0.0135
 
- 
-  delay(100);
+  cmm = (duration2/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+
+  inches2 = (duration2/2) / 74;   // Divide by 74 or multiply by 0.0135
+
+
+
+ Serial.print(inches2);
+  Serial.print("in, ");
+  Serial.print(cmm);
+  Serial.print("cmm");
+    
+  Serial.println();
+
+  Serial.print(inches);
+  Serial.print("in, ");
+  Serial.print(cm);
+  Serial.print("cm");
+    
+  Serial.println();
+
 
 // switch
   
@@ -229,6 +254,13 @@ void loop() {
       digitalWrite(motorPin, LOW);
     } else if (cm >= 101){
       digitalWrite(motorPin, HIGH);
+    }
+
+    /*motor 2*/
+    if (cmm <= 100){
+      digitalWrite(motorPin2, LOW);
+    } else if (cmm >= 101){
+      digitalWrite(motorPin2, HIGH);
     }
 
 /*all the buttom Logic*/
