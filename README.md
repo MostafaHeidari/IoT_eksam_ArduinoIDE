@@ -1,8 +1,8 @@
 # IoT_eksam_ArduinoIDE
-*This is the illustration of final IoT exam project.
+* This is the illustration of final IoT exam project.
 ![Model_Blind_IoT](https://user-images.githubusercontent.com/70130828/226474047-80811943-7379-447b-acfb-e73acc724ebd.png)
 
-*It is an illustration of workflow.
+* It is an illustration of workflow.
 ![Diagram drawio (1)](https://user-images.githubusercontent.com/70130828/226851659-f1dd22a6-6f2f-45d8-8103-3979642814e2.png)
 
 
