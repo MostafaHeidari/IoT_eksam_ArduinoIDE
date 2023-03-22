@@ -3,7 +3,8 @@
 ![Model_Blind_IoT](https://user-images.githubusercontent.com/70130828/226474047-80811943-7379-447b-acfb-e73acc724ebd.png)
 
 * It is an illustration of workflow.
-![DiagramIoT](https://user-images.githubusercontent.com/70130828/226862457-6ff74dbf-24f3-46ec-a6de-d5ab47552755.png)
+![DiagramIoT_Exam](https://user-images.githubusercontent.com/70130828/226894413-e04dc87f-11d6-4c6a-adfd-a65d38a4d2b6.png)
+
 
 
 
