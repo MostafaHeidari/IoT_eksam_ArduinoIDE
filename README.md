@@ -3,7 +3,8 @@
 ![Model_Blind_IoT](https://user-images.githubusercontent.com/70130828/226474047-80811943-7379-447b-acfb-e73acc724ebd.png)
 
 * It is an illustration of workflow.
-![Diagram drawio (1)](https://user-images.githubusercontent.com/70130828/226851659-f1dd22a6-6f2f-45d8-8103-3979642814e2.png)
+![Diagram_IoT drawio (1)](https://user-images.githubusercontent.com/70130828/226853754-05c902ee-44fa-44d9-9c24-ba59290d9693.png)
+
 
 
 * use your SSID and Password form your telephone if you want to use and connecting to the ESP32. 
